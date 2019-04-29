@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,26 +16,43 @@ import com.google.android.gms.tasks.TaskExecutors;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class LoginActivity extends AppCompatActivity {
-    private EditText phonenumber;
+    private EditText phoneNumberTextField;
     private Button signUpButton;
+    private Button signInButton;
+    private EditText emailTextField;
+    private EditText passswordTextField;
     private FirebaseAuth mAuth;
     private String mVerificationId;
+    private String email;
+    private String password;
+    private String phoneNumber;
+    private FirebaseUser user;
     Intent intent;
+    DatabaseReference userDatabase;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        phonenumber = findViewById(R.id.phoneNumber);
+        phoneNumberTextField = findViewById(R.id.phoneNumber);
         signUpButton = findViewById(R.id.button);
-
+        signInButton = findViewById(R.id.signin);
+        emailTextField = findViewById(R.id.email);
+        passswordTextField = findViewById(R.id.password);
+        mAuth = FirebaseAuth.getInstance();
+        userDatabase = FirebaseDatabase.getInstance().getReference();
+        user = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     private void sendVerificationCode(String no) {
@@ -46,12 +64,13 @@ public class LoginActivity extends AppCompatActivity {
                 mCallbacks);
     }
 
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks =
+            new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         @Override
         public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
             String code = phoneAuthCredential.getSmsCode();
             if (code != null && mVerificationId != null) {
-                Intent intent = new Intent(LoginActivity.this,VerifyMobile.class);
+                intent = new Intent(LoginActivity.this,VerifyMobile.class);
                 intent.putExtra("code",code);
                 intent.putExtra("VerificationId",mVerificationId);
                 verifyVerificationCode(code);
@@ -77,15 +96,80 @@ public class LoginActivity extends AppCompatActivity {
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
     }
 
-    public void signup(View view){
+    public void signin(View view){
+        email = emailTextField.getText().toString();
+        password = passswordTextField.getText().toString();
+        phoneNumber = phoneNumberTextField.getText().toString();
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (!task.isSuccessful()) {
 
-        if(phonenumber != null){
-            sendVerificationCode(phonenumber.getText().toString());
+                    Toast.makeText(LoginActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    user = mAuth.getCurrentUser();
+                    Log.i("result", task.getResult().toString());
+                    intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra("userNameId", mAuth.getUid());
+                    intent.putExtra("userEmail",user.getEmail());
+                    startActivity(intent);
+
+                }
+            }
+        });
+    }
+
+    public void signup(View view){
+        email = emailTextField.getText().toString();
+        password = passswordTextField.getText().toString();
+        phoneNumber = phoneNumberTextField.getText().toString();
+
+        if(phoneNumberTextField != null && isValidEmail(email) && password != null){
+
+            //sendVerificationCode(phoneNumberTextField.getText().toString());
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("LOGIN", "createUserWithEmail:success");
+                                writeNewUser(email,mAuth.getUid(),phoneNumber);
+                                Toast.makeText(LoginActivity.this, "User created please sign in",
+                                        Toast.LENGTH_SHORT).show();
+
+                            } else {
+
+                                Log.i("LOGIN", "createUserWithEmail:failure", task.getException());
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+                    });
+
         }else{
-            Toast.makeText(this,"Phone no. not valid", Toast.LENGTH_SHORT);
+            Toast.makeText(this,"Phone/email not valid", Toast.LENGTH_SHORT);
         }
 
     }
+
+    public void writeNewUser(String email,String userId,String number){
+        ArrayList<String> friendListByUserId = new ArrayList<String>();
+        friendListByUserId.add("");
+        User user = new User(email,friendListByUserId,number);
+        userDatabase.child("users").child(userId).setValue(user);
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (target == null)
+            return false;
+
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+
 }
 
 

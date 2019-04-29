@@ -6,6 +6,41 @@
     android:layout_height="match_parent"
     tools:context=".LoginActivity">
 
+    <Button
+        android:id="@+id/signin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="524dp"
+        android:onClick="signin"
+        android:text="Sign-In"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="301dp"
+        android:layout_height="43dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="344dp"
+        android:hint="please enter password"
+        android:inputType="textPassword"
+        android:text="123456"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="301dp"
+        android:layout_height="43dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="284dp"
+        android:hint="please enter email"
+        android:text="anim2@gmail.com"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/phoneNumber"
         android:layout_width="301dp"
@@ -13,6 +48,8 @@
         android:layout_marginStart="55dp"
         android:layout_marginTop="227dp"
         android:hint="please enter phone number"
+        android:inputType="number"
+        android:text="015237362491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -20,8 +57,9 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="353dp"
+        android:layout_marginStart="148dp"
+        android:layout_marginTop="524dp"
+        android:background="?attr/selectableItemBackground"
         android:onClick="signup"
         android:text="signup"
         app:layout_constraintStart_toStartOf="parent"
