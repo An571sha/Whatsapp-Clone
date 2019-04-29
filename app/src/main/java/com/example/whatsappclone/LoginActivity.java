@@ -160,6 +160,10 @@ public class LoginActivity extends AppCompatActivity {
         friendListByUserId.add("");
         User user = new User(email,friendListByUserId,number);
         userDatabase.child("users").child(userId).setValue(user);
+        ArrayList<String> chats = new ArrayList<String>();
+        chats.add("");
+        Chat chat = new Chat(chats);
+        userDatabase.child("chat").child(email).setValue(chat);
     }
 
     public final static boolean isValidEmail(CharSequence target) {

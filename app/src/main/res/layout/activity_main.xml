@@ -14,6 +14,7 @@
         android:layout_marginTop="666dp"
         android:onClick="signout"
         android:text="signout"
+        android:background="?attr/selectableItemBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

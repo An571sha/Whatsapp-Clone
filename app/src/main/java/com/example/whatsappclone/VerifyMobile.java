@@ -57,7 +57,7 @@ public class VerifyMobile extends AppCompatActivity {
 
                         } else {
 
-                            String message = "Somthing is wrong, we will fix it soon...";
+                            String message = "Somthing went wrong";
 
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 message = "Invalid code entered...";

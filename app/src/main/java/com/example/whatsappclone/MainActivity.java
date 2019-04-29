@@ -46,7 +46,10 @@ public class MainActivity extends AppCompatActivity {
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String clickedEmail =(String)parent.getItemAtPosition(position);
                 intent = new Intent(MainActivity.this,ChatActivity.class);
+                intent.putExtra("clickedEmail",clickedEmail);
+                intent.putExtra("userEmail",email);
                 startActivity(intent);
             }
         });
