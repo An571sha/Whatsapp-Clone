@@ -1,5 +1,6 @@
 package com.example.whatsappclone;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.view.View;
@@ -35,6 +35,7 @@ public class ChatActivity extends AppCompatActivity {
     private String clickedEmail;
     private String userEmail;
     ArrayList chatList;
+    ArrayList testList;
     HashMap<String,Object> keyAndEmailmap;
     String key;
 
@@ -50,14 +51,15 @@ public class ChatActivity extends AppCompatActivity {
         userEmail = getIntent().getStringExtra("userEmail");
         userDatabase = FirebaseDatabase.getInstance().getReference();
         onChatDatachanged();
-        //----------recyclerView--------------//
 
 
     }
 
-    public void updateRecyclerView(ArrayList list){
-        mMessageRecycler = (RecyclerView) findViewById(R.id.reyclerview);
+    //------RecyclerView is not displaying 
+    public void updateRecyclerView(ArrayList<String> list){
+        mMessageRecycler =  findViewById(R.id.reyclerview);
         layoutManager = new LinearLayoutManager(this);
+        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
         mMessageRecycler.setLayoutManager(layoutManager);
         mMessageAdapter = new MyAdapter(list);
         mMessageRecycler.setAdapter(mMessageAdapter);
@@ -88,6 +90,12 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onChatDatachanged(){
         chatList = new ArrayList<>();
+        testList = new ArrayList<>();
+        testList.add(("Featured"));
+        testList.add(("Categories"));
+        testList.add(("Sell"));
+        testList.add(("Settings"));
+        testList.add(("Logout"));
         DatabaseReference userRef = userDatabase.child("chat").child(encodeString(userEmail));
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -99,8 +107,7 @@ public class ChatActivity extends AppCompatActivity {
                         keyAndEmailmap.put(userSnapshot.getKey(),userSnapshot.getValue());
                         chatList.add(userSnapshot.getValue());
                     }
-                    Log.i("ChatList",chatList.toString());
-                    updateRecyclerView(chatList);
+                    updateRecyclerView(testList);
 
                 }else{
                     Toast.makeText(ChatActivity.this, "No chats were found",
@@ -117,42 +124,48 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
-        ArrayList<String> chatList;
+        ArrayList<String> mChatList;
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
+
             public TextView textView;
-            public MyViewHolder(TextView v) {
+            public MyViewHolder(View v) {
                 super(v);
-                textView = v;
+                textView = v.findViewById(R.id.text_message_body);
             }
         }
 
-        public MyAdapter(ArrayList chatListConstructor){
-            chatList = chatListConstructor;
-            chatList.add("1");
-            chatList.add("2");
-            chatList.add("3");
+        public MyAdapter(ArrayList<String> list){
+            mChatList = list;
         }
 
 
         @NonNull
         @Override
         public MyAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-            TextView v = (TextView) LayoutInflater.from(ChatActivity.this)
+            Context context = viewGroup.getContext();
+            View v = LayoutInflater.from(context)
                     .inflate(R.layout.chat_box, viewGroup, false);
             MyViewHolder vh = new MyViewHolder(v);
+            Log.i("ChatListVh",vh.toString());
             return vh;
         }
 
+
+
         @Override
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder myViewHolder, int i) {
-            myViewHolder.textView.setText(chatList.get(i));
+            TextView mTextView = myViewHolder.textView;
+            mTextView.setText(mChatList.get(i));
+            Log.i("ChatList",mChatList.toString());
 
         }
 
         @Override
         public int getItemCount() {
-            return chatList.size();
+            Log.i("ChatList Size",String.valueOf(mChatList.size()));
+            return mChatList.size();
+
         }
     }
 
