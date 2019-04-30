@@ -163,7 +163,7 @@ public class LoginActivity extends AppCompatActivity {
         ArrayList<String> chats = new ArrayList<String>();
         chats.add("");
         Chat chat = new Chat(chats);
-        userDatabase.child("chat").child(email).setValue(chat);
+        userDatabase.child("chat").child(encodeString(email)).setValue(chat);
     }
 
     public final static boolean isValidEmail(CharSequence target) {
@@ -171,6 +171,10 @@ public class LoginActivity extends AppCompatActivity {
             return false;
 
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    public static String encodeString(String string) {
+        return string.replace(".", ",");
     }
 
 
