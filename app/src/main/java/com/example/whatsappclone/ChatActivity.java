@@ -36,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     private String userEmail;
     ArrayList chatList;
     ArrayList testList;
+    ArrayList<ChatForUser> chatSentToUser;
     HashMap<String,Object> keyAndEmailmap;
     String key;
 
@@ -56,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     //------RecyclerView is not displaying----------------
-    public void updateRecyclerView(ArrayList<String> list){
+    public void updateRecyclerView(ArrayList<ChatForUser> list){
         mMessageRecycler =  findViewById(R.id.reyclerview);
         layoutManager = new LinearLayoutManager(this);
         ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -105,12 +106,12 @@ public class ChatActivity extends AppCompatActivity {
                     chatList.clear();
                     keyAndEmailmap = new HashMap<>();
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        keyAndEmailmap.put(userSnapshot.getKey(),userSnapshot.getValue());
+                        keyAndEmailmap.put(String.valueOf(userSnapshot.child(encodeString(clickedEmail)).getKey()),userSnapshot.child(encodeString(clickedEmail)).getValue());
                         chatList.add(userSnapshot.getValue().toString());
 
                     }
                     Log.i("chatList",chatList.toString());
-                    updateRecyclerView(chatList);
+                    updateRecyclerView(getMenulist(keyAndEmailmap));
 
                 }else{
                     Toast.makeText(ChatActivity.this, "No chats were found",
@@ -127,18 +128,20 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
-        ArrayList<String> mChatList;
+        ArrayList<ChatForUser> mChatList;
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
 
-            public TextView textView;
+            public TextView detailsTextView;
+            public TextView contentTextView;
             public MyViewHolder(View v) {
                 super(v);
-                textView = v.findViewById(R.id.text_message_body);
+                detailsTextView = v.findViewById(R.id.menu_details);
+                contentTextView = v.findViewById(R.id.menu_title);
             }
         }
 
-        public MyAdapter(ArrayList<String> list){
+        public MyAdapter(ArrayList<ChatForUser> list){
             mChatList = list;
         }
 
@@ -148,7 +151,7 @@ public class ChatActivity extends AppCompatActivity {
         public MyAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             Context context = viewGroup.getContext();
             View v = LayoutInflater.from(context)
-                    .inflate(R.layout.chat_box, viewGroup, false);
+                    .inflate(R.layout.row, viewGroup, false);
             MyViewHolder vh = new MyViewHolder(v);
             Log.i("ChatListVh",vh.toString());
             return vh;
@@ -158,8 +161,9 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder myViewHolder, int i) {
-            TextView mTextView = myViewHolder.textView;
-            mTextView.setText(mChatList.get(i));
+            ChatForUser chatForUser = mChatList.get(i);
+            myViewHolder.contentTextView.setText( chatForUser.title);
+            myViewHolder.detailsTextView.setText(chatForUser.details);
             Log.i("ChatListInAdapter",mChatList.toString());
 
         }
@@ -171,6 +175,26 @@ public class ChatActivity extends AppCompatActivity {
 
         }
     }
+
+
+    public ArrayList<ChatForUser> getMenulist(HashMap keyAndEmailmap) {
+
+        chatSentToUser = new ArrayList<ChatForUser>();
+
+        chatSentToUser.add( new ChatForUser(keyAndEmailmap.keySet().toString(), keyAndEmailmap.values().toString()) );
+        return chatSentToUser;
+    }
+
+    public class ChatForUser {
+        public String title, details;
+
+        public ChatForUser(String title, String details){
+            this.details = details;
+            this.title = title;
+        }
+
+    }
+
 
 
 
