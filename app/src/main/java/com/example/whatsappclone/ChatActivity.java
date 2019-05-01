@@ -55,14 +55,15 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    //------RecyclerView is not displaying 
+    //------RecyclerView is not displaying----------------
     public void updateRecyclerView(ArrayList<String> list){
         mMessageRecycler =  findViewById(R.id.reyclerview);
         layoutManager = new LinearLayoutManager(this);
         ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
-        mMessageRecycler.setLayoutManager(layoutManager);
         mMessageAdapter = new MyAdapter(list);
         mMessageRecycler.setAdapter(mMessageAdapter);
+        mMessageRecycler.setLayoutManager(layoutManager);
+
 
     }
 
@@ -90,12 +91,12 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onChatDatachanged(){
         chatList = new ArrayList<>();
-        testList = new ArrayList<>();
+       /* testList = new ArrayList<>();
         testList.add(("Featured"));
         testList.add(("Categories"));
         testList.add(("Sell"));
         testList.add(("Settings"));
-        testList.add(("Logout"));
+        testList.add(("Logout"));*/
         DatabaseReference userRef = userDatabase.child("chat").child(encodeString(userEmail));
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -105,9 +106,11 @@ public class ChatActivity extends AppCompatActivity {
                     keyAndEmailmap = new HashMap<>();
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                         keyAndEmailmap.put(userSnapshot.getKey(),userSnapshot.getValue());
-                        chatList.add(userSnapshot.getValue());
+                        chatList.add(userSnapshot.getValue().toString());
+
                     }
-                    updateRecyclerView(testList);
+                    Log.i("chatList",chatList.toString());
+                    updateRecyclerView(chatList);
 
                 }else{
                     Toast.makeText(ChatActivity.this, "No chats were found",
@@ -157,7 +160,7 @@ public class ChatActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder myViewHolder, int i) {
             TextView mTextView = myViewHolder.textView;
             mTextView.setText(mChatList.get(i));
-            Log.i("ChatList",mChatList.toString());
+            Log.i("ChatListInAdapter",mChatList.toString());
 
         }
 
