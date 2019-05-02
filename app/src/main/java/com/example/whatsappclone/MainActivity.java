@@ -23,12 +23,14 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     String email;
-    String userid;
+    String userId;
+
     Intent intent;
     ListView userListView;
     ArrayAdapter userListArrayAdapter;
     DatabaseReference userDatabase;
     ArrayList userArrayList;
+    ArrayList userIdArrayList;
     HashMap<String,Object> keyAndEmailmap;
 
 
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         email = getIntent().getStringExtra("userEmail");
         this.setTitle(email);
-        userid = getIntent().getStringExtra("userNameId");
+        userId = getIntent().getStringExtra("userNameId");
         userListView = findViewById(R.id.friendsListView);
         userDatabase = FirebaseDatabase.getInstance().getReference();
         onUserDataChange();
@@ -46,10 +48,11 @@ public class MainActivity extends AppCompatActivity {
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String clickedEmail =(String)parent.getItemAtPosition(position);
+                String clickedId = userIdArrayList.get(position).toString();
                 intent = new Intent(MainActivity.this,ChatActivity.class);
-                intent.putExtra("clickedEmail",clickedEmail);
-                intent.putExtra("userEmail",email);
+                intent.putExtra("clickedId",clickedId);
+                intent.putExtra("userId", userId);
+                Log.d("Logging The Value", clickedId);
                 startActivity(intent);
             }
         });
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onUserDataChange(){
         userArrayList = new ArrayList<>();
+        userIdArrayList = new ArrayList<>();
         DatabaseReference userRef = userDatabase.child("users");
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -76,8 +80,9 @@ public class MainActivity extends AppCompatActivity {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                         keyAndEmailmap.put(userSnapshot.getKey(),userSnapshot.child("email").getValue().toString());
                         userArrayList.add(userSnapshot.child("email").getValue().toString());
+                        userIdArrayList.add(userSnapshot.child("userId").getValue().toString());
                     }
-                    Log.d("Logging The Value", keyAndEmailmap.toString());
+
                     userListArrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, userArrayList);
 
                     userListView.setAdapter(userListArrayAdapter);

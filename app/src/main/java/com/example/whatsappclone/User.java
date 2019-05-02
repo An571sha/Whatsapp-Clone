@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public class User {
     public String email;
-    public ArrayList<String> friendsListByUserId;
+    public String userId;
     public String phonenumber;
 
-    public User(String email, ArrayList friendsListByUserId, String phonenumber) {
+    public User(String email, String userId, String phonenumber) {
         this.email = email;
-        this.friendsListByUserId = friendsListByUserId;
+        this.userId = userId;
         this.phonenumber = phonenumber;
     }
 
@@ -21,12 +21,12 @@ public class User {
         this.email = email;
     }
 
-    public ArrayList<String> getFriendsListByUserId() {
-        return friendsListByUserId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setFriendsListByUserId(ArrayList<String> friendsListByUserId) {
-        this.friendsListByUserId = friendsListByUserId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getPhonenumber() {

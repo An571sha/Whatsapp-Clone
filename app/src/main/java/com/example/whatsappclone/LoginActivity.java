@@ -156,9 +156,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void writeNewUser(String email,String userId,String number){
-        ArrayList<String> friendListByUserId = new ArrayList<String>();
-        friendListByUserId.add("");
-        User user = new User(email,friendListByUserId,number);
+        User user = new User(email,userId,number);
         userDatabase.child("users").child(userId).setValue(user);
         ArrayList<String> chats = new ArrayList<String>();
         chats.add("");

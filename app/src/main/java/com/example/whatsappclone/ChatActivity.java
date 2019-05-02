@@ -22,8 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     private RecyclerView mMessageRecycler;
@@ -32,13 +33,16 @@ public class ChatActivity extends AppCompatActivity {
     private Button sendButton;
     private EditText chatBox;
     private DatabaseReference userDatabase;
-    private String clickedEmail;
-    private String userEmail;
+    private String clickedId;
+    private String userId;
     ArrayList chatList;
     ArrayList testList;
     ArrayList<ChatForUser> chatSentToUser;
     HashMap<String,Object> keyAndEmailmap;
     String key;
+    DatabaseReference user1AndUser2Reference;
+    DatabaseReference user2AndUser1Reference;
+    String combinedUserId;
 
 
     @Override
@@ -47,16 +51,14 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         sendButton = findViewById(R.id.send);
         chatBox = findViewById(R.id.chatbox);
-        clickedEmail = getIntent().getStringExtra("clickedEmail");
-        Log.d("Logging clickedEmail", clickedEmail);
-        userEmail = getIntent().getStringExtra("userEmail");
+        clickedId = getIntent().getStringExtra("clickedId");
+        userId = getIntent().getStringExtra("userId");
         userDatabase = FirebaseDatabase.getInstance().getReference();
         onChatDatachanged();
 
 
     }
 
-    //------RecyclerView is not displaying----------------
     public void updateRecyclerView(ArrayList<ChatForUser> list){
         mMessageRecycler =  findViewById(R.id.reyclerview);
         layoutManager = new LinearLayoutManager(this);
@@ -68,17 +70,55 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    public String sortString(String userId, String clickedId){
+        String[] s = new String[]{userId,clickedId};
+        Arrays.sort(s);
+        combinedUserId = String.join("_",s);
+        return combinedUserId;
+    }
 
 
     public void send(View view){
-        Log.d("Logging userEmail",encodeString(userEmail));
-        DatabaseReference dbReference = userDatabase.child("chat").child(encodeString(userEmail)).push();
-        key = dbReference.getKey();
-        Map<String,Object> map = new HashMap<>();
-        map.put(encodeString(clickedEmail) ,chatBox.getText().toString());
-        dbReference.updateChildren(map);
+        Log.d("Logging userId",encodeString(userId));
+        combinedUserId = userId + clickedId;
+        user1AndUser2Reference = userDatabase.child("chat").child(sortString(userId,clickedId)).push();
+        key = user1AndUser2Reference.getKey();
+        ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
+        user1AndUser2Reference.setValue(chatBetweenUsers);
         onChatDatachanged();
 
+        /* userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() == null){
+                    user1AndUser2Reference = userDatabase.child("chat").child(encodeString(userId)+""+encodeString(clickedId)).push();
+                    user2AndUser1Reference = userDatabase.child("chat").child(encodeString(clickedId)+""+encodeString(userId)).push();
+
+                    key = user1AndUser2Reference.getKey();
+                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
+                    user1AndUser2Reference.setValue(chatBetweenUsers);
+                    onChatDatachanged();
+
+                }else if( dataSnapshot.getValue() == user1AndUser2Reference){
+                    key = user1AndUser2Reference.getKey();
+                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
+                    user1AndUser2Reference.push().setValue(chatBetweenUsers);
+                    onChatDatachanged();
+                }else if( dataSnapshot.getValue() == user2AndUser1Reference){
+                    key = user2AndUser1Reference.getKey();
+                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
+                    user2AndUser1Reference.push().setValue(chatBetweenUsers);
+                    onChatDatachanged();
+                }
+
+                Log.i("datasnap", dataSnapshot.toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });*/
 
     }
 
@@ -92,13 +132,7 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onChatDatachanged(){
         chatList = new ArrayList<>();
-       /* testList = new ArrayList<>();
-        testList.add(("Featured"));
-        testList.add(("Categories"));
-        testList.add(("Sell"));
-        testList.add(("Settings"));
-        testList.add(("Logout"));*/
-        DatabaseReference userRef = userDatabase.child("chat").child(encodeString(userEmail));
+        DatabaseReference userRef = userDatabase.child("chat").child(encodeString(userId));
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -106,12 +140,15 @@ public class ChatActivity extends AppCompatActivity {
                     chatList.clear();
                     keyAndEmailmap = new HashMap<>();
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        keyAndEmailmap.put(String.valueOf(userSnapshot.child(encodeString(clickedEmail)).getKey()),userSnapshot.child(encodeString(clickedEmail)).getValue());
-                        chatList.add(userSnapshot.getValue().toString());
+                        keyAndEmailmap.put(String.valueOf(userSnapshot.child(encodeString(clickedId)).getKey()),
+                                userSnapshot.child(encodeString(clickedId)).getValue());
+
+                        chatList.add(userSnapshot.child(encodeString(clickedId)).toString());
 
                     }
-                    Log.i("chatList",chatList.toString());
                     updateRecyclerView(getMenulist(keyAndEmailmap));
+                    Log.i("Map e",(chatList.toString()));
+
 
                 }else{
                     Toast.makeText(ChatActivity.this, "No chats were found",
@@ -179,11 +216,19 @@ public class ChatActivity extends AppCompatActivity {
 
     public ArrayList<ChatForUser> getMenulist(HashMap keyAndEmailmap) {
 
-        chatSentToUser = new ArrayList<ChatForUser>();
+        chatSentToUser = new ArrayList<>();
+        List<String> list1 = new ArrayList<String>(keyAndEmailmap.keySet());
+        List<String> list2 = new ArrayList<String>(keyAndEmailmap.values());
 
-        chatSentToUser.add( new ChatForUser(keyAndEmailmap.keySet().toString(), keyAndEmailmap.values().toString()) );
+        for(int i=0; i< list1.size(); i++) {
+            chatSentToUser.add(new ChatForUser(list1.get(i), list2.get(i)));
+        }
+
+        Log.i("chatListsdfdsadsfasd",chatSentToUser.toString());
         return chatSentToUser;
     }
+
+
 
     public class ChatForUser {
         public String title, details;
@@ -196,6 +241,5 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-
-
 }
+
