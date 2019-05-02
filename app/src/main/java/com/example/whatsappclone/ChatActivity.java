@@ -35,14 +35,16 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference userDatabase;
     private String clickedId;
     private String userId;
+    String userEmail;
+    String clickedEmail;
     ArrayList chatList;
     ArrayList testList;
-    ArrayList<ChatForUser> chatSentToUser;
+    ArrayList<ChatBetweenUsers> chatSentToUser;
     HashMap<String,Object> keyAndEmailmap;
     String key;
     DatabaseReference user1AndUser2Reference;
     DatabaseReference user2AndUser1Reference;
-    String combinedUserId;
+    String chatId;
 
 
     @Override
@@ -54,15 +56,18 @@ public class ChatActivity extends AppCompatActivity {
         clickedId = getIntent().getStringExtra("clickedId");
         userId = getIntent().getStringExtra("userId");
         userDatabase = FirebaseDatabase.getInstance().getReference();
-        onChatDatachanged();
+        chatId = generateChatId(userId,clickedId);
+        onChatDataChanged();
+
+
 
 
     }
 
-    public void updateRecyclerView(ArrayList<ChatForUser> list){
+    public void updateRecyclerView(ArrayList<ChatBetweenUsers> list){
         mMessageRecycler =  findViewById(R.id.reyclerview);
         layoutManager = new LinearLayoutManager(this);
-        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
+        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.VERTICAL);
         mMessageAdapter = new MyAdapter(list);
         mMessageRecycler.setAdapter(mMessageAdapter);
         mMessageRecycler.setLayoutManager(layoutManager);
@@ -70,22 +75,20 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    public String sortString(String userId, String clickedId){
+    public String generateChatId(String userId, String clickedId){
         String[] s = new String[]{userId,clickedId};
         Arrays.sort(s);
-        combinedUserId = String.join("_",s);
-        return combinedUserId;
+        return String.join("_",s);
     }
 
 
     public void send(View view){
         Log.d("Logging userId",encodeString(userId));
-        combinedUserId = userId + clickedId;
-        user1AndUser2Reference = userDatabase.child("chat").child(sortString(userId,clickedId)).push();
+        user1AndUser2Reference = userDatabase.child("chat").child(chatId).push();
         key = user1AndUser2Reference.getKey();
-        ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
+        com.example.whatsappclone.ChatBetweenUsers chatBetweenUsers = new com.example.whatsappclone.ChatBetweenUsers(key, userId, chatBox.getText().toString());
         user1AndUser2Reference.setValue(chatBetweenUsers);
-        onChatDatachanged();
+        onChatDataChanged();
 
         /* userReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -97,18 +100,18 @@ public class ChatActivity extends AppCompatActivity {
                     key = user1AndUser2Reference.getKey();
                     ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
                     user1AndUser2Reference.setValue(chatBetweenUsers);
-                    onChatDatachanged();
+                    onChatDataChanged();
 
                 }else if( dataSnapshot.getValue() == user1AndUser2Reference){
                     key = user1AndUser2Reference.getKey();
                     ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
                     user1AndUser2Reference.push().setValue(chatBetweenUsers);
-                    onChatDatachanged();
+                    onChatDataChanged();
                 }else if( dataSnapshot.getValue() == user2AndUser1Reference){
                     key = user2AndUser1Reference.getKey();
                     ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
                     user2AndUser1Reference.push().setValue(chatBetweenUsers);
-                    onChatDatachanged();
+                    onChatDataChanged();
                 }
 
                 Log.i("datasnap", dataSnapshot.toString());
@@ -130,24 +133,24 @@ public class ChatActivity extends AppCompatActivity {
         return string.replace(",", ".");
     }
 
-    public void onChatDatachanged(){
+    public void onChatDataChanged(){
         chatList = new ArrayList<>();
-        DatabaseReference userRef = userDatabase.child("chat").child(encodeString(userId));
-        userRef.addValueEventListener(new ValueEventListener() {
+        DatabaseReference chatRef = userDatabase.child("chat").child(chatId);
+        chatRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    chatList.clear();
-                    keyAndEmailmap = new HashMap<>();
-                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        keyAndEmailmap.put(String.valueOf(userSnapshot.child(encodeString(clickedId)).getKey()),
-                                userSnapshot.child(encodeString(clickedId)).getValue());
+            public void onDataChange(@NonNull DataSnapshot chatDataSnapshot) {
+                chatList.clear();
+                if(chatDataSnapshot.exists()){
+                    Iterable<DataSnapshot> chatMessagesRef = chatDataSnapshot.getChildren();
 
-                        chatList.add(userSnapshot.child(encodeString(clickedId)).toString());
-
+                    for( DataSnapshot chatMessageRef : chatMessagesRef ){
+                        chatList.add(chatMessageRef.getValue(ChatBetweenUsers.class));
                     }
-                    updateRecyclerView(getMenulist(keyAndEmailmap));
-                    Log.i("Map e",(chatList.toString()));
+
+
+                    Log.i("chatList ",(chatList.toString()));
+                    Log.i("DataSnapShot ",(chatDataSnapshot.getChildren().toString()));
+                    updateRecyclerView(chatList);
 
 
                 }else{
@@ -165,7 +168,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
-        ArrayList<ChatForUser> mChatList;
+        ArrayList<ChatBetweenUsers> mChatList;
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -178,7 +181,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        public MyAdapter(ArrayList<ChatForUser> list){
+        public MyAdapter(ArrayList<ChatBetweenUsers> list){
             mChatList = list;
         }
 
@@ -198,9 +201,9 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder myViewHolder, int i) {
-            ChatForUser chatForUser = mChatList.get(i);
-            myViewHolder.contentTextView.setText( chatForUser.title);
-            myViewHolder.detailsTextView.setText(chatForUser.details);
+            ChatBetweenUsers chatBetweenUsers = mChatList.get(i);
+            myViewHolder.contentTextView.setText(chatBetweenUsers.getUserId());
+            myViewHolder.detailsTextView.setText(chatBetweenUsers.getMessage());
             Log.i("ChatListInAdapter",mChatList.toString());
 
         }
@@ -213,32 +216,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-
-    public ArrayList<ChatForUser> getMenulist(HashMap keyAndEmailmap) {
-
-        chatSentToUser = new ArrayList<>();
-        List<String> list1 = new ArrayList<String>(keyAndEmailmap.keySet());
-        List<String> list2 = new ArrayList<String>(keyAndEmailmap.values());
-
-        for(int i=0; i< list1.size(); i++) {
-            chatSentToUser.add(new ChatForUser(list1.get(i), list2.get(i)));
-        }
-
-        Log.i("chatListsdfdsadsfasd",chatSentToUser.toString());
-        return chatSentToUser;
-    }
-
-
-
-    public class ChatForUser {
-        public String title, details;
-
-        public ChatForUser(String title, String details){
-            this.details = details;
-            this.title = title;
-        }
-
-    }
 
 
 }

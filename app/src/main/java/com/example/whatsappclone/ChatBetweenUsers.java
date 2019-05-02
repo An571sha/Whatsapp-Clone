@@ -8,6 +8,8 @@ public class ChatBetweenUsers {
     public String userId;
     public String message;
 
+    public ChatBetweenUsers() {}
+
     public ChatBetweenUsers(String messageId, String uId, String message) {
         this.messageId = messageId;
         this.userId = uId;
