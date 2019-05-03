@@ -8,12 +8,16 @@ public class ChatBetweenUsers {
     public String userId;
     public String message;
 
+
+    public String email;
+
     public ChatBetweenUsers() {}
 
-    public ChatBetweenUsers(String messageId, String uId, String message) {
+    public ChatBetweenUsers(String messageId, String uId, String message, String email) {
         this.messageId = messageId;
         this.userId = uId;
         this.message = message;
+        this.email = email;
     }
 
     public String getMessageId() {
@@ -41,6 +45,14 @@ public class ChatBetweenUsers {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 

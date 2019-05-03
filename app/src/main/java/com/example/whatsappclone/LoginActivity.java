@@ -158,10 +158,7 @@ public class LoginActivity extends AppCompatActivity {
     public void writeNewUser(String email,String userId,String number){
         User user = new User(email,userId,number);
         userDatabase.child("users").child(userId).setValue(user);
-        ArrayList<String> chats = new ArrayList<String>();
-        chats.add("");
-        Chat chat = new Chat(chats);
-        userDatabase.child("chat").child(encodeString(email)).setValue(chat);
+
     }
 
     public final static boolean isValidEmail(CharSequence target) {

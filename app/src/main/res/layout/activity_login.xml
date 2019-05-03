@@ -26,7 +26,6 @@
         android:layout_marginTop="344dp"
         android:hint="please enter password"
         android:inputType="textPassword"
-        android:text="123456"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,7 +36,6 @@
         android:layout_marginStart="52dp"
         android:layout_marginTop="284dp"
         android:hint="please enter email"
-        android:text="anim2@gmail.com"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,7 +47,6 @@
         android:layout_marginTop="227dp"
         android:hint="please enter phone number"
         android:inputType="number"
-        android:text="015237362491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

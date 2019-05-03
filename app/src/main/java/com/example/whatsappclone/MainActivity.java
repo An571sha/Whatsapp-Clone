@@ -49,8 +49,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedId = userIdArrayList.get(position).toString();
+                String clickedEmail = (String) userListView.getItemAtPosition(position);
                 intent = new Intent(MainActivity.this,ChatActivity.class);
                 intent.putExtra("clickedId",clickedId);
+                intent.putExtra("clickedEmail",clickedEmail);
+                intent.putExtra("userEmail",email);
                 intent.putExtra("userId", userId);
                 Log.d("Logging The Value", clickedId);
                 startActivity(intent);
