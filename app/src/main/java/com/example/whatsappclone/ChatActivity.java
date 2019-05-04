@@ -1,18 +1,17 @@
 package com.example.whatsappclone;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,7 +29,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     private RecyclerView mMessageRecycler;
@@ -41,6 +39,7 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference userDatabase;
     private String clickedId;
     private String userId;
+    GetBetweenUserDatainBackground getBetweenUserDatainBackground;
     Boolean showEmail;
     LinearLayout linearLayout;
     String userEmail;
@@ -69,11 +68,8 @@ public class ChatActivity extends AppCompatActivity {
         userId = getIntent().getStringExtra("userId");
         userDatabase = FirebaseDatabase.getInstance().getReference();
         chatId = generateChatId(userId,clickedId);
-        onChatDataChanged();
-
-
-
-
+        getBetweenUserDatainBackground = new GetBetweenUserDatainBackground();
+        getBetweenUserDatainBackground.execute("");
     }
 
     public void updateRecyclerView(ArrayList<ChatBetweenUsers> list){
@@ -100,7 +96,9 @@ public class ChatActivity extends AppCompatActivity {
         key = user1AndUser2Reference.getKey();
         com.example.whatsappclone.ChatBetweenUsers chatBetweenUsers = new com.example.whatsappclone.ChatBetweenUsers(key, userId, chatBox.getText().toString(),userEmail);
         user1AndUser2Reference.setValue(chatBetweenUsers);
-        onChatDataChanged();
+        getBetweenUserDatainBackground = new GetBetweenUserDatainBackground();
+        getBetweenUserDatainBackground.execute("");
+        chatBox.getText().clear();
         hideKeybord(view);
     }
 
@@ -112,48 +110,61 @@ public class ChatActivity extends AppCompatActivity {
         return string.replace(",", ".");
     }
 
-    public void onChatDataChanged(){
-        chatList = new ArrayList<>();
 
-        DatabaseReference chatRef = userDatabase.child("chat").child(chatId);
-        chatRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot chatDataSnapshot) {
-                chatList.clear();
-                if(chatDataSnapshot.exists()){
-                    Iterable<DataSnapshot> chatMessagesRef = chatDataSnapshot.getChildren();
-                    String previousSender = null;
-                    for( DataSnapshot chatMessageRef : chatMessagesRef ){
-                        ChatBetweenUsers chatBetweenUsersInstance = chatMessageRef.getValue(ChatBetweenUsers.class);
-                        String currentSender = chatBetweenUsersInstance.getEmail();
+    private class GetBetweenUserDatainBackground extends AsyncTask<String, Void, String> {
 
-                        chatBetweenUsersInstance.setShowEmail(!currentSender.equals(previousSender));
+        @Override
+        protected String doInBackground(String... strings) {
+                chatList = new ArrayList<>();
+                DatabaseReference chatRef = userDatabase.child("chat").child(chatId);
+                chatRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot chatDataSnapshot) {
+                        chatList.clear();
+                        if(chatDataSnapshot.exists()){
+                            Iterable<DataSnapshot> chatMessagesRef = chatDataSnapshot.getChildren();
+                            String previousSender = null;
+                            for( DataSnapshot chatMessageRef : chatMessagesRef ){
+                                ChatBetweenUsers chatBetweenUsersInstance = chatMessageRef.getValue(ChatBetweenUsers.class);
+                                String currentSender = chatBetweenUsersInstance.getEmail();
 
-                        chatList.add(chatBetweenUsersInstance);
-                        previousSender = currentSender;
+                                chatBetweenUsersInstance.setShowEmail(!currentSender.equals(previousSender));
 
+                                chatList.add(chatBetweenUsersInstance);
+                                previousSender = currentSender;
+
+
+                            }
+
+
+                            Log.i("chatList ",(chatList.toString()));
+                            Log.i("DataSnapShot ",(chatDataSnapshot.getChildren().toString()));
+
+
+
+                        }else{
+                            Toast.makeText(ChatActivity.this, "No chats were found",
+                                    Toast.LENGTH_SHORT).show();
+                        }
 
                     }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    Log.i("chatList ",(chatList.toString()));
-                    Log.i("DataSnapShot ",(chatDataSnapshot.getChildren().toString()));
-                    updateRecyclerView(chatList);
+                    }
+                });
+
+                return "task_Is_Complete";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            updateRecyclerView(chatList);
+        }
 
 
-                }else{
-                    Toast.makeText(ChatActivity.this, "No chats were found",
-                            Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
+}
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
         ArrayList<ChatBetweenUsers> mChatList;
