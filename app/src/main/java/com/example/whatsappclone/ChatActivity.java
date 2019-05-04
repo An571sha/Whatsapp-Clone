@@ -2,7 +2,6 @@ package com.example.whatsappclone;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class ChatActivity extends AppCompatActivity {
     private RecyclerView mMessageRecycler;
@@ -40,20 +37,12 @@ public class ChatActivity extends AppCompatActivity {
     private String clickedId;
     private String userId;
     GetBetweenUserDatainBackground getBetweenUserDatainBackground;
-    Boolean showEmail;
-    LinearLayout linearLayout;
     String userEmail;
     String clickedEmail;
     ArrayList chatList;
-    ArrayList<ChatBetweenUsers> chatSentToUser;
-    HashMap<String,Object> keyAndEmailmap;
     String key;
     DatabaseReference user1AndUser2Reference;
     String chatId;
-    Handler handler;
-    ArrayList checkChatList;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,18 +124,14 @@ public class ChatActivity extends AppCompatActivity {
 
 
                             }
-
-
                             Log.i("chatList ",(chatList.toString()));
                             Log.i("DataSnapShot ",(chatDataSnapshot.getChildren().toString()));
-
 
 
                         }else{
                             Toast.makeText(ChatActivity.this, "No chats were found",
                                     Toast.LENGTH_SHORT).show();
                         }
-
                     }
 
                     @Override
@@ -154,7 +139,6 @@ public class ChatActivity extends AppCompatActivity {
 
                     }
                 });
-
                 return "task_Is_Complete";
         }
 
