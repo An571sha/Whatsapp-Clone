@@ -41,6 +41,7 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference userDatabase;
     private String clickedId;
     private String userId;
+    Boolean showEmail;
     LinearLayout linearLayout;
     String userEmail;
     String clickedEmail;
@@ -51,6 +52,8 @@ public class ChatActivity extends AppCompatActivity {
     DatabaseReference user1AndUser2Reference;
     String chatId;
     Handler handler;
+    ArrayList checkChatList;
+
 
 
     @Override
@@ -99,41 +102,6 @@ public class ChatActivity extends AppCompatActivity {
         user1AndUser2Reference.setValue(chatBetweenUsers);
         onChatDataChanged();
         hideKeybord(view);
-
-
-        /* userReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() == null){
-                    user1AndUser2Reference = userDatabase.child("chat").child(encodeString(userId)+""+encodeString(clickedId)).push();
-                    user2AndUser1Reference = userDatabase.child("chat").child(encodeString(clickedId)+""+encodeString(userId)).push();
-
-                    key = user1AndUser2Reference.getKey();
-                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
-                    user1AndUser2Reference.setValue(chatBetweenUsers);
-                    onChatDataChanged();
-
-                }else if( dataSnapshot.getValue() == user1AndUser2Reference){
-                    key = user1AndUser2Reference.getKey();
-                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
-                    user1AndUser2Reference.push().setValue(chatBetweenUsers);
-                    onChatDataChanged();
-                }else if( dataSnapshot.getValue() == user2AndUser1Reference){
-                    key = user2AndUser1Reference.getKey();
-                    ChatBetweenUsers  chatBetweenUsers = new ChatBetweenUsers(key, userId, chatBox.getText().toString());
-                    user2AndUser1Reference.push().setValue(chatBetweenUsers);
-                    onChatDataChanged();
-                }
-
-                Log.i("datasnap", dataSnapshot.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
-
     }
 
     public static String encodeString(String string) {
@@ -146,6 +114,7 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onChatDataChanged(){
         chatList = new ArrayList<>();
+
         DatabaseReference chatRef = userDatabase.child("chat").child(chatId);
         chatRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -153,9 +122,17 @@ public class ChatActivity extends AppCompatActivity {
                 chatList.clear();
                 if(chatDataSnapshot.exists()){
                     Iterable<DataSnapshot> chatMessagesRef = chatDataSnapshot.getChildren();
-
+                    String previousSender = null;
                     for( DataSnapshot chatMessageRef : chatMessagesRef ){
-                        chatList.add(chatMessageRef.getValue(ChatBetweenUsers.class));
+                        ChatBetweenUsers chatBetweenUsersInstance = chatMessageRef.getValue(ChatBetweenUsers.class);
+                        String currentSender = chatBetweenUsersInstance.getEmail();
+
+                        chatBetweenUsersInstance.setShowEmail(!currentSender.equals(previousSender));
+
+                        chatList.add(chatBetweenUsersInstance);
+                        previousSender = currentSender;
+
+
                     }
 
 
@@ -238,8 +215,18 @@ public class ChatActivity extends AppCompatActivity {
         public void setTextViews(MyAdapter.MyViewHolder myViewHolder, LinearLayout.LayoutParams layoutParams, ChatBetweenUsers chatBetweenUsers ){
             myViewHolder.contentTextView.setLayoutParams(layoutParams);
             myViewHolder.detailsTextView.setLayoutParams(layoutParams);
-            myViewHolder.contentTextView.setText(chatBetweenUsers.getEmail());
             myViewHolder.detailsTextView.setText(chatBetweenUsers.getMessage());
+
+            Log.i("test1 ", chatBetweenUsers.getShowEmail().toString());
+
+            if(chatBetweenUsers.getShowEmail()) {
+                myViewHolder.contentTextView.setText(chatBetweenUsers.getEmail());
+
+            }else{
+                myViewHolder.contentTextView.setText(null);
+                myViewHolder.contentTextView.setHeight(0);
+
+            }
         }
 
     }

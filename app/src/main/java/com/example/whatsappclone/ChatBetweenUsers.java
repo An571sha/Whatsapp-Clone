@@ -4,12 +4,11 @@ import java.util.ArrayList;
 
 public class ChatBetweenUsers {
 
-    public String messageId;
-    public String userId;
-    public String message;
-
-
-    public String email;
+    private String messageId;
+    private String userId;
+    private String message;
+    private Boolean showEmail = true;
+    private String email;
 
     public ChatBetweenUsers() {}
 
@@ -54,6 +53,12 @@ public class ChatBetweenUsers {
     public void setEmail(String email) {
         this.email = email;
     }
+    public Boolean getShowEmail() {
+        return showEmail;
+    }
 
+    public void setShowEmail(Boolean showEmail) {
+        this.showEmail = showEmail;
+    }
 
 }
