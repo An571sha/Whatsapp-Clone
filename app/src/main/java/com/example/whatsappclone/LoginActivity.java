@@ -1,8 +1,10 @@
 package com.example.whatsappclone;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -63,51 +65,12 @@ public class LoginActivity extends AppCompatActivity {
         meter.setEditText(passswordTextField);
     }
 
-    private void startPhoneVerification(String no) {
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                "+49" + no,
-                60,
-                TimeUnit.SECONDS,
-                TaskExecutors.MAIN_THREAD,
-                mCallbacks);
-    }
-
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks =
-            new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-        @Override
-        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-            String code = phoneAuthCredential.getSmsCode();
-            if (code != null && mVerificationId != null) {
-                intent = new Intent(LoginActivity.this,VerifyMobile.class);
-                intent.putExtra("code",code);
-                intent.putExtra("VerificationId",mVerificationId);
-                verifyVerificationCode(code);
-                startActivity(intent);
-
-            }
-        }
-
-        @Override
-        public void onVerificationFailed(FirebaseException e) {
-            Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-            super.onCodeSent(verificationId, forceResendingToken);
-            mVerificationId = verificationId;
-        }
-    };
-
-    private void verifyVerificationCode(String code) {
-        //creating the credential
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
-    }
-
+    
     public void signin(View view){
         email = emailTextField.getText().toString();
         password = passswordTextField.getText().toString();
         phoneNumber = phoneNumberTextField.getText().toString();
+
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -116,12 +79,34 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
 
                 } else {
+
                     user = mAuth.getCurrentUser();
-                    Log.i("result", task.getResult().toString());
-                    intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.putExtra("userNameId", mAuth.getUid());
-                    intent.putExtra("userEmail",user.getEmail());
-                    startActivity(intent);
+
+                    if (user!= null && user.isEmailVerified()) {
+
+                        Log.i("result", task.getResult().toString());
+                        intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.putExtra("userNameId", mAuth.getUid());
+                        intent.putExtra("userEmail", user.getEmail());
+                        startActivity(intent);
+
+                    } else {
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                        builder.setMessage("please verify your email.");
+                        builder.setCancelable(true);
+                        builder.setNegativeButton(
+                                "Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert11 = builder.create();
+                        alert11.show();
+
+                    }
 
                 }
             }
@@ -133,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
         password = passswordTextField.getText().toString();
         phoneNumber = phoneNumberTextField.getText().toString();
 
-        if(!phoneNumber.isEmpty() && isValidEmail(email) && !password.isEmpty()){
+        if(isValidEmail(email) && !password.isEmpty()){
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -186,7 +171,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public final static boolean isValidEmail(CharSequence target) {
+    public static boolean isValidEmail(CharSequence target) {
         if (target == null)
             return false;
 
