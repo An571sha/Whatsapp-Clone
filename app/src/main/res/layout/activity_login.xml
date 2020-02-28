@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,45 +10,63 @@
         android:id="@+id/signin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="524dp"
-        android:onClick="signin"
-        android:text="Sign-In"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="292dp"
         android:background="?attr/selectableItemBackground"
+        android:onClick="signin"
+        android:text="@string/sign_in"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter
+        android:id="@+id/passwordInputMeter"
+        android:layout_width="323dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="12dp"
+        app:animateChanges="true"
+        app:animationDuration="300"
+        app:labelTextSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/button"
+        app:layout_constraintHorizontal_bias="0.372"
+        app:layout_constraintStart_toStartOf="@+id/signin"
+        app:layout_constraintTop_toBottomOf="@+id/password"
+        app:showStrengthBar="true"
+        app:showStrengthLabel="true"
+        app:strengthBarHeight="5dp" />
+
     <EditText
         android:id="@+id/password"
-        android:layout_width="301dp"
+        android:layout_width="299dp"
         android:layout_height="43dp"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="344dp"
-        android:text="123456"
-        android:hint="please enter password"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="176dp"
+        android:hint="@string/please_enter_password"
         android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="@+id/email"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/email"
-        android:layout_width="301dp"
+        android:layout_width="299dp"
         android:layout_height="43dp"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="284dp"
-        android:text="anim2@gmail.com"
-        android:hint="please enter email"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="112dp"
+        android:hint="@string/please_enter_email"
+        app:layout_constraintEnd_toEndOf="@+id/phoneNumber"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/phoneNumber"
-        android:layout_width="301dp"
+        android:layout_width="299dp"
         android:layout_height="43dp"
-        android:layout_marginStart="55dp"
-        android:layout_marginTop="227dp"
-        android:hint="please enter phone number"
+        android:layout_marginTop="48dp"
+        android:hint="@string/please_enter_phone_number"
         android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -56,11 +74,11 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="148dp"
-        android:layout_marginTop="524dp"
+        android:layout_marginStart="240dp"
+        android:layout_marginTop="292dp"
         android:background="?attr/selectableItemBackground"
         android:onClick="signup"
-        android:text="signup"
+        android:text="@string/signup"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

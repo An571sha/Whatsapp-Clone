@@ -1,8 +1,9 @@
 package com.example.whatsappclone;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,8 +23,9 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+
+import se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText phoneNumberTextField;
@@ -31,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button signInButton;
     private EditText emailTextField;
     private EditText passswordTextField;
+    private PasswordStrengthMeter meter;
     private FirebaseAuth mAuth;
     private String mVerificationId;
     private String email;
@@ -45,17 +48,22 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         phoneNumberTextField = findViewById(R.id.phoneNumber);
         signUpButton = findViewById(R.id.button);
         signInButton = findViewById(R.id.signin);
         emailTextField = findViewById(R.id.email);
         passswordTextField = findViewById(R.id.password);
+        meter = findViewById(R.id.passwordInputMeter);
+
         mAuth = FirebaseAuth.getInstance();
         userDatabase = FirebaseDatabase.getInstance().getReference();
         user = FirebaseAuth.getInstance().getCurrentUser();
+
+        meter.setEditText(passswordTextField);
     }
 
-    private void sendVerificationCode(String no) {
+    private void startPhoneVerification(String no) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
                 "+49" + no,
                 60,
@@ -125,18 +133,15 @@ public class LoginActivity extends AppCompatActivity {
         password = passswordTextField.getText().toString();
         phoneNumber = phoneNumberTextField.getText().toString();
 
-        if(phoneNumberTextField != null && isValidEmail(email) && password != null){
+        if(!phoneNumber.isEmpty() && isValidEmail(email) && !password.isEmpty()){
 
-            //sendVerificationCode(phoneNumberTextField.getText().toString());
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Log.d("LOGIN", "createUserWithEmail:success");
-                                writeNewUser(email,mAuth.getUid(),phoneNumber);
-                                Toast.makeText(LoginActivity.this, "User created please sign in",
-                                        Toast.LENGTH_SHORT).show();
+                                writeNewUserInDatabase(email,mAuth.getUid(),phoneNumber);
+                                sendVerificationEmail(mAuth, LoginActivity.this);
 
                             } else {
 
@@ -148,17 +153,37 @@ public class LoginActivity extends AppCompatActivity {
 
                         }
                     });
+        } else {
 
-        }else{
-            Toast.makeText(this,"Phone/email not valid", Toast.LENGTH_SHORT);
+            Toast.makeText(this,"Phone/email not valid", Toast.LENGTH_SHORT).show();
         }
+
+
 
     }
 
-    public void writeNewUser(String email,String userId,String number){
+    public void writeNewUserInDatabase(String email, String userId, String number){
         User user = new User(email,userId,number);
         userDatabase.child("users").child(userId).setValue(user);
 
+    }
+
+    public void sendVerificationEmail(FirebaseAuth mAuth, final Context context){
+        mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    Toast.makeText(context,
+                            "Verification email sent to " + user.getEmail(),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("Whatsapp-Error", "sendEmailVerification", task.getException());
+                    Toast.makeText(context,
+                            "Failed to send verification email.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     public final static boolean isValidEmail(CharSequence target) {
