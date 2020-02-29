@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray"
-    tools:context=".SignUpActivity">
+    tools:context=".SignInActitvity">
 
     <ImageView
         android:id="@+id/imageView2"
@@ -29,68 +29,75 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView2"
         app:srcCompat="@drawable/ic_background_login" />
 
-
-    <se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter
-        android:id="@+id/passwordInputMeter"
-        android:layout_width="323dp"
-        android:layout_height="31dp"
-        app:animateChanges="true"
-        app:animationDuration="300"
-        app:labelTextSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/imageBackground"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password"
-        app:showStrengthBar="true"
-        app:showStrengthLabel="true"
-        app:strengthBarHeight="5dp" />
-
     <EditText
         android:id="@+id/password"
         android:layout_width="299dp"
         android:layout_height="43dp"
         android:layout_marginStart="44dp"
-        android:layout_marginTop="260dp"
-        android:hint="@string/please_enter_password"
+        android:layout_marginTop="16dp"
+        android:hint="PASSWORD"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="@+id/email"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/email" />
 
     <EditText
         android:id="@+id/email"
         android:layout_width="299dp"
         android:layout_height="43dp"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="204dp"
-        android:hint="@string/please_enter_email"
-        app:layout_constraintEnd_toEndOf="@+id/phoneNumber"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="40dp"
+        android:hint="EMAIL"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/phoneNumber"
-        android:layout_width="299dp"
-        android:layout_height="43dp"
-        android:layout_marginTop="148dp"
-        android:hint="@string/please_enter_phone_number"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="304dp"
-        android:layout_marginTop="528dp"
+        android:id="@+id/signin"
+        android:layout_width="186dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="260dp"
+        android:layout_marginTop="540dp"
         android:background="?attr/selectableItemBackground"
-        android:onClick="signup"
-        android:text="@string/signup"
+        android:onClick="signin"
+        android:text="@string/sign_in"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="289dp"
+        android:layout_height="58dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="272dp"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/lblListItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="center_vertical"
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+            android:text="DON'T HAVE AN ACCOUNT?" />
+
+        <Button
+            android:id="@+id/checkout"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="signup"
+            android:background="?attr/selectableItemBackground"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:text="SIGN UP"
+            android:textSize="12dp" />
+
+    </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

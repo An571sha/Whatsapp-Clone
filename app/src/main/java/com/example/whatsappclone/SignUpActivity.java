@@ -1,5 +1,6 @@
 package com.example.whatsappclone;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,7 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,21 +18,17 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.TaskExecutors;
-import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter;
 
-public class LoginActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
     private EditText phoneNumberTextField;
     private Button signUpButton;
     private Button signInButton;
@@ -37,15 +36,14 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passswordTextField;
     private PasswordStrengthMeter meter;
     private FirebaseAuth mAuth;
-    private String mVerificationId;
     private String email;
     private String password;
     private String phoneNumber;
     private FirebaseUser user;
-    Intent intent;
     DatabaseReference userDatabase;
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,57 +56,44 @@ public class LoginActivity extends AppCompatActivity {
         passswordTextField = findViewById(R.id.password);
         meter = findViewById(R.id.passwordInputMeter);
 
+        int infoIcon = R.drawable.ic_info_black_20dp;
+        passswordTextField.setCompoundDrawablesWithIntrinsicBounds(0,0,infoIcon,0);
+
         mAuth = FirebaseAuth.getInstance();
         userDatabase = FirebaseDatabase.getInstance().getReference();
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         meter.setEditText(passswordTextField);
-    }
 
-    
-    public void signin(View view){
-        email = emailTextField.getText().toString();
-        password = passswordTextField.getText().toString();
-        phoneNumber = phoneNumberTextField.getText().toString();
 
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+        passswordTextField.setOnTouchListener(new View.OnTouchListener() {
+            AtomicBoolean isPasswordDisplayedAsDots = new AtomicBoolean();
+
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (!task.isSuccessful()) {
+            public boolean onTouch(View v, MotionEvent event) {
 
-                    Toast.makeText(LoginActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
+                final int DRAWABLE_RIGHT = 2;
 
-                } else {
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (passswordTextField.getRight() - passswordTextField.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
 
-                    user = mAuth.getCurrentUser();
+                        if(isPasswordDisplayedAsDots.get()){
 
-                    if (user!= null && user.isEmailVerified()) {
+                            Log.i("booleanTestShouldBeTrue", String.valueOf(isPasswordDisplayedAsDots.get()));
+                            passswordTextField.setTransformationMethod(null);
+                            isPasswordDisplayedAsDots.set(false);
 
-                        Log.i("result", task.getResult().toString());
-                        intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra("userNameId", mAuth.getUid());
-                        intent.putExtra("userEmail", user.getEmail());
-                        startActivity(intent);
+                        } else {
 
-                    } else {
+                            Log.i("booleanTestShouldBeFalse", String.valueOf(isPasswordDisplayedAsDots.get()));
+                            passswordTextField.setTransformationMethod(new PasswordTransformationMethod());
+                            isPasswordDisplayedAsDots.set(true);
+                        }
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                        builder.setMessage("please verify your email.");
-                        builder.setCancelable(true);
-                        builder.setNegativeButton(
-                                "Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        AlertDialog alert11 = builder.create();
-                        alert11.show();
-
+                        Toast.makeText(SignUpActivity.this,"Password Visibility toggled", Toast.LENGTH_SHORT).show();
+                        return true;
                     }
-
                 }
+                return false;
             }
         });
     }
@@ -126,12 +111,12 @@ public class LoginActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 Log.d("LOGIN", "createUserWithEmail:success");
                                 writeNewUserInDatabase(email,mAuth.getUid(),phoneNumber);
-                                sendVerificationEmail(mAuth, LoginActivity.this);
+                                sendVerificationEmail(mAuth, SignUpActivity.this);
 
                             } else {
 
                                 Log.i("LOGIN", "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                Toast.makeText(SignUpActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
 
@@ -176,10 +161,6 @@ public class LoginActivity extends AppCompatActivity {
             return false;
 
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-    }
-
-    public static String encodeString(String string) {
-        return string.replace(".", ",");
     }
 
 
