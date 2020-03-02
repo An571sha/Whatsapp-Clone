@@ -1,4 +1,4 @@
-package com.example.whatsappclone;
+package com.example.whatsappclone.activities;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.whatsappclone.ChatBetweenUsers;
+import com.example.whatsappclone.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -157,6 +159,7 @@ public class ChatActivity extends AppCompatActivity {
 
             public TextView detailsTextView;
             public TextView contentTextView;
+
             public MyViewHolder(View v) {
                 super(v);
                 detailsTextView = v.findViewById(R.id.menu_details);

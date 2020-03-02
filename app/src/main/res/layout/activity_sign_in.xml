@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray"
-    tools:context=".SignInActitvity">
+    tools:context=".activities.SignInActivity">
 
     <ImageView
         android:id="@+id/imageView2"
@@ -49,6 +49,7 @@
         android:layout_marginStart="56dp"
         android:layout_marginTop="40dp"
         android:hint="EMAIL"
+        android:text="anim_esh@yahoo.co.in"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 

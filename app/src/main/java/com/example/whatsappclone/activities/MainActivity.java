@@ -1,4 +1,4 @@
-package com.example.whatsappclone;
+package com.example.whatsappclone.activities;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.whatsappclone.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedId = userIdArrayList.get(position).toString();
                 String clickedEmail = (String) userListView.getItemAtPosition(position);
-                intent = new Intent(MainActivity.this,ChatActivity.class);
+                intent = new Intent(MainActivity.this, ChatActivity.class);
                 intent.putExtra("clickedId",clickedId);
                 intent.putExtra("clickedEmail",clickedEmail);
                 intent.putExtra("userEmail",email);
