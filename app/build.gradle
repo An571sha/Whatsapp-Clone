@@ -26,8 +26,9 @@ dependencies {
 
     implementation 'com.android.support:preference-v7:28.1.0'
 
-
     implementation 'se.aaro.gustav:passwordstrengthmeter:0.1'
+
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
 
     implementation 'com.google.firebase:firebase-auth:19.2.0'
     implementation 'com.google.firebase:firebase-core:17.2.3'

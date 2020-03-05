@@ -47,7 +47,7 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_up);
 
         phoneNumberTextField = findViewById(R.id.phoneNumber);
         signUpButton = findViewById(R.id.button);
@@ -143,13 +143,11 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Toast.makeText(context,
-                            "Verification email sent to " + user.getEmail(),
+                    Toast.makeText(context, "Verification email sent to " + user.getEmail(),
                             Toast.LENGTH_SHORT).show();
                 } else {
                     Log.e("Whatsapp-Error", "sendEmailVerification", task.getException());
-                    Toast.makeText(context,
-                            "Failed to send verification email.",
+                    Toast.makeText(context, "Failed to send verification email.",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -159,7 +157,6 @@ public class SignUpActivity extends AppCompatActivity {
     public static boolean isValidEmail(CharSequence target) {
         if (target == null)
             return false;
-
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 

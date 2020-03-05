@@ -38,6 +38,8 @@ public class SignInActivity extends AppCompatActivity implements SharedPreferenc
 
     private String email;
     private String password;
+    private String exception;
+    private String trimmedExceptionName;
     private FirebaseUser user;
     private FirebaseAuth mAuth;
 
@@ -78,9 +80,10 @@ public class SignInActivity extends AppCompatActivity implements SharedPreferenc
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (!task.isSuccessful()) {
-
-                    Toast.makeText(SignInActivity.this, "sign in error", Toast.LENGTH_SHORT).show();
-                    Log.e("ERROR", task.getException().toString());
+                    exception = task.getException().toString();
+                    trimmedExceptionName = exception.substring(exception.lastIndexOf(":") + 1).trim();
+                    Toast.makeText(SignInActivity.this, trimmedExceptionName, Toast.LENGTH_SHORT).show();
+                    Log.e("ERROR", trimmedExceptionName);
 
                 } else {
 
