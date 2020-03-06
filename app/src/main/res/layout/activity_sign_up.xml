@@ -39,8 +39,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="321dp"
-        android:layout_height="183dp"
+        android:layout_width="317dp"
+        android:layout_height="207dp"
         android:layout_marginEnd="44dp"
         android:layout_marginBottom="272dp"
         android:orientation="vertical"
@@ -72,7 +72,7 @@
 
         <se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter
             android:id="@+id/passwordInputMeter"
-            android:layout_width="323dp"
+            android:layout_width="299dp"
             android:layout_height="31dp"
             android:layout_marginTop="10dp"
             app:animateChanges="true"

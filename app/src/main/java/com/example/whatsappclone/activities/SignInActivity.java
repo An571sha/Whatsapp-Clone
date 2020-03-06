@@ -20,9 +20,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.whatsappclone.R;
+import com.example.whatsappclone.utility.Utility;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -79,6 +81,7 @@ public class SignInActivity extends AppCompatActivity implements SharedPreferenc
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
+
                 if (!task.isSuccessful()) {
                     exception = task.getException().toString();
                     trimmedExceptionName = exception.substring(exception.lastIndexOf(":") + 1).trim();
@@ -101,13 +104,21 @@ public class SignInActivity extends AppCompatActivity implements SharedPreferenc
                     } else {
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(SignInActivity.this);
-                        builder.setMessage("please verify your email.");
+                        builder.setMessage("Please verify your email. If you did not receive any email please click on resend");
                         builder.setCancelable(true);
                         builder.setNegativeButton(
-                                "Cancel",
+                                "CANCEL",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
+                                    }
+                                });
+
+                        builder.setPositiveButton(
+                                "RESEND",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Utility.sendVerificationEmail(SignInActivity.this,user,mAuth,SignInActivity.this);
                                     }
                                 });
 

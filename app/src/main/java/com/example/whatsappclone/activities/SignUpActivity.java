@@ -1,10 +1,13 @@
 package com.example.whatsappclone.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -12,10 +15,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.whatsappclone.R;
 import com.example.whatsappclone.User;
+import com.example.whatsappclone.utility.Utility;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -29,6 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import se.aaro.gustav.passwordstrengthmeter.PasswordStrengthMeter;
 
 public class SignUpActivity extends AppCompatActivity {
+    private final int IMAGE_PICKER_RQUEST_CODE = 100;
+
     private EditText phoneNumberTextField;
     private Button signUpButton;
     private Button signInButton;
@@ -40,6 +47,10 @@ public class SignUpActivity extends AppCompatActivity {
     private String password;
     private String phoneNumber;
     private FirebaseUser user;
+    private ImageView addProfileImage;
+    private ImageView profileImage;
+    private Uri imageUri;
+
     DatabaseReference userDatabase;
 
 
@@ -55,6 +66,8 @@ public class SignUpActivity extends AppCompatActivity {
         emailTextField = findViewById(R.id.email);
         passswordTextField = findViewById(R.id.password);
         meter = findViewById(R.id.passwordInputMeter);
+        profileImage = findViewById(R.id.profilePic);
+        addProfileImage = findViewById(R.id.iv_camera);
 
         int infoIcon = R.drawable.ic_info_black_20dp;
         passswordTextField.setCompoundDrawablesWithIntrinsicBounds(0,0,infoIcon,0);
@@ -66,6 +79,7 @@ public class SignUpActivity extends AppCompatActivity {
 
 
         passswordTextField.setOnTouchListener(new View.OnTouchListener() {
+
             AtomicBoolean isPasswordDisplayedAsDots = new AtomicBoolean();
 
             @Override
@@ -73,10 +87,10 @@ public class SignUpActivity extends AppCompatActivity {
 
                 final int DRAWABLE_RIGHT = 2;
 
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (passswordTextField.getRight() - passswordTextField.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (passswordTextField.getRight() - passswordTextField.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
 
-                        if(isPasswordDisplayedAsDots.get()){
+                        if (isPasswordDisplayedAsDots.get()) {
 
                             Log.i("booleanTestShouldBeTrue", String.valueOf(isPasswordDisplayedAsDots.get()));
                             passswordTextField.setTransformationMethod(null);
@@ -96,6 +110,15 @@ public class SignUpActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        addProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent imagePickerIntent = new Intent(Intent.ACTION_PICK);
+                imagePickerIntent.setType("image/*");
+                startActivityForResult(imagePickerIntent, IMAGE_PICKER_RQUEST_CODE);
+            }
+        });
     }
 
     public void signup(View view){
@@ -103,15 +126,29 @@ public class SignUpActivity extends AppCompatActivity {
         password = passswordTextField.getText().toString();
         phoneNumber = phoneNumberTextField.getText().toString();
 
-        if(isValidEmail(email) && !password.isEmpty()){
+        if (Utility.isValidEmail(email) && !password.isEmpty()) {
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Log.d("LOGIN", "createUserWithEmail:success");
-                                writeNewUserInDatabase(email,mAuth.getUid(),phoneNumber);
-                                sendVerificationEmail(mAuth, SignUpActivity.this);
+
+/*
+                                if (imageUri!= null) {
+
+                                    writeNewUserInDatabase(email, mAuth.getUid(),phoneNumber,imageUri);
+
+                                } else {
+
+                                    //load default profile image
+                                    Resources resources = getApplicationContext().getResources();
+                                    imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + resources.getResourcePackageName(R.drawable.ic_background) + '/' + resources.getResourceTypeName(R.drawable.ic_background) + '/' + resources.getResourceEntryName(R.drawable.ic_background));
+                                    writeNewUserInDatabase(email, mAuth.getUid(),phoneNumber,imageUri);
+                                }
+*/
+                                writeNewUserInDatabase(email, mAuth.getUid(),phoneNumber);
+                                Utility.sendVerificationEmail(SignUpActivity.this, user, mAuth, SignUpActivity.this);
 
                             } else {
 
@@ -125,39 +162,24 @@ public class SignUpActivity extends AppCompatActivity {
                     });
         } else {
 
-            Toast.makeText(this,"Phone/email not valid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Password/email not valid", Toast.LENGTH_SHORT).show();
         }
 
+    }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_PICKER_RQUEST_CODE && resultCode == RESULT_OK) {
+            imageUri = data.getData();
+            profileImage.setImageURI(imageUri);
+        }
     }
 
     public void writeNewUserInDatabase(String email, String userId, String number){
         User user = new User(email,userId,number);
         userDatabase.child("users").child(userId).setValue(user);
 
-    }
-
-    public void sendVerificationEmail(FirebaseAuth mAuth, final Context context){
-        mAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Toast.makeText(context, "Verification email sent to " + user.getEmail(),
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.e("Whatsapp-Error", "sendEmailVerification", task.getException());
-                    Toast.makeText(context, "Failed to send verification email.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    public static boolean isValidEmail(CharSequence target) {
-        if (target == null)
-            return false;
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
 

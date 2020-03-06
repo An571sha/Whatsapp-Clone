@@ -1,5 +1,7 @@
 package com.example.whatsappclone;
 
+import android.net.Uri;
+
 import java.util.ArrayList;
 
 public class User {
